@@ -499,12 +499,94 @@
     border-radius: 3px;
   }
 
+  /* ─── Search ─── */
+  header { gap: 20px; }
+  .search-wrap {
+    position: relative;
+    flex: 0 1 300px;
+  }
+  #search-input {
+    width: 100%;
+    background: #FFD70010;
+    border: 1px solid #FFD70033;
+    border-radius: 20px;
+    padding: 7px 16px;
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  #search-input::placeholder { color: #7A5C00; }
+  #search-input:focus {
+    border-color: #FFD70077;
+    background: #FFD70018;
+    box-shadow: 0 0 14px #FFD70033;
+  }
+  #search-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max(100%, 260px);
+    background: #100D00F5;
+    border: 1px solid #FFD70033;
+    border-radius: 10px;
+    box-shadow: 0 0 30px #FFD70022, 0 8px 40px #00000088;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    z-index: 300;
+    animation: dropdown-in 0.18s ease forwards;
+  }
+  @keyframes dropdown-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  #search-dropdown.open { display: block; }
+  .search-item {
+    padding: 10px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold-pale);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    border-bottom: 1px solid #FFD70011;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-item:last-child { border-bottom: none; }
+  .search-item:hover, .search-item.active {
+    background: #FFD70018;
+    color: var(--gold-bright);
+    text-shadow: 0 0 8px #FFD70066;
+  }
+  .search-item mark {
+    background: none;
+    color: var(--gold-bright);
+    font-weight: 500;
+    text-shadow: 0 0 8px #FFD70088;
+  }
+  .search-empty {
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #7A5C00;
+    text-align: center;
+  }
+
   /* ─── Responsive ─── */
+  @media (max-width: 700px) { .search-wrap { flex: 0 1 140px; } }
   @media (max-width: 600px) {
     main { padding: 110px 20px 80px; }
-    header { padding: 16px 20px; }
+    header { padding: 16px 20px; gap: 10px; }
     .brand { font-size: 18px; }
-    #article-name { font-size: 10px; max-width: 40%; }
+    #article-name { font-size: 10px; max-width: 25%; }
+    .search-wrap { flex: 0 1 110px; }
   }
 </style>
 </head>
@@ -518,6 +600,10 @@
 <!-- Header -->
 <header>
   <div class="brand">Yellow<span>Dot</span></div>
+  <div class="search-wrap" id="search-wrap">
+    <input type="text" id="search-input" placeholder="Find an article…" autocomplete="off" spellcheck="false">
+    <div id="search-dropdown"></div>
+  </div>
   <div id="article-name"></div>
 </header>
 <div class="header-line"></div>
@@ -751,6 +837,99 @@ async function loadArticle() {
     errEl.textContent = `Could not load "${article}.md" — ${e.message}`;
   }
 }
+
+// ─── Search ───────────────────────────────────────────────
+(async function initSearch() {
+  let articles = [];
+  try {
+    const res = await fetch('articles.json');
+    if (res.ok) articles = await res.json();
+  } catch(e) {}
+
+  const input    = document.getElementById('search-input');
+  const dropdown = document.getElementById('search-dropdown');
+  let activeIdx  = -1;
+
+  function sortedArticles(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      const welcome = articles.filter(a => a.name.toLowerCase() === 'welcome');
+      const rest = articles.filter(a => a.name.toLowerCase() !== 'welcome')
+                           .sort((a,b) => a.name.localeCompare(b.name));
+      return [...welcome, ...rest];
+    }
+    return articles
+      .filter(a => a.name.toLowerCase().includes(q))
+      .sort((a,b) => {
+        const ai = a.name.toLowerCase().indexOf(q);
+        const bi = b.name.toLowerCase().indexOf(q);
+        if (ai !== bi) return ai - bi;
+        return a.name.localeCompare(b.name);
+      });
+  }
+
+  function highlight(text, query) {
+    if (!query.trim()) return text;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase().trim());
+    if (idx === -1) return text;
+    return text.slice(0, idx) +
+      '<mark>' + text.slice(idx, idx + query.trim().length) + '</mark>' +
+      text.slice(idx + query.trim().length);
+  }
+
+  function navigate(slug) {
+    window.location.href = '?article=' + encodeURIComponent(slug);
+  }
+
+  function renderDropdown(query) {
+    const results = sortedArticles(query);
+    activeIdx = -1;
+    if (results.length === 0) {
+      dropdown.innerHTML = '<div class="search-empty">No articles found</div>';
+    } else {
+      dropdown.innerHTML = results.map((a, i) =>
+        `<div class="search-item" data-slug="${a.slug}" data-idx="${i}">${highlight(a.name, query)}</div>`
+      ).join('');
+      dropdown.querySelectorAll('.search-item').forEach(el => {
+        el.addEventListener('mousedown', e => {
+          e.preventDefault();
+          navigate(el.dataset.slug);
+        });
+      });
+    }
+    dropdown.classList.add('open');
+  }
+
+  input.addEventListener('focus', () => renderDropdown(input.value));
+  input.addEventListener('input', () => renderDropdown(input.value));
+
+  input.addEventListener('keydown', e => {
+    const items = dropdown.querySelectorAll('.search-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+      if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, -1);
+      items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = activeIdx >= 0 ? items[activeIdx] : items[0];
+      if (target) navigate(target.dataset.slug);
+    } else if (e.key === 'Escape') {
+      dropdown.classList.remove('open');
+      input.blur();
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!document.getElementById('search-wrap').contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
+})();
 
 loadArticle();
 </script>
