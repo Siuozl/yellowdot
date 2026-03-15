@@ -1,1 +1,758 @@
--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YellowDot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
+
+  :root {
+    --gold:        #F5C518;
+    --gold-bright: #FFD700;
+    --gold-pale:   #FFF4B2;
+    --gold-dark:   #B8860B;
+    --gold-deep:   #7A5C00;
+    --ink:         #1A1200;
+    --ink-soft:    #2E2100;
+    --cream:       #FFFBE6;
+    --cream2:      #FFF7D0;
+    --glow-sm:  0 0 8px #FFD70088,  0 0 18px #F5C51844;
+    --glow-md:  0 0 12px #FFD700AA, 0 0 30px #F5C51866, 0 0 60px #B8860B33;
+    --glow-lg:  0 0 20px #FFD700CC, 0 0 50px #F5C51888, 0 0 100px #B8860B44;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0D0A00;
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Background field ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, #2A1D0088 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 85% 90%, #1E1500AA 0%, transparent 55%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, #100C0066 0%, #0D0A00 100%);
+    pointer-events: none;
+  }
+
+  /* Animated grain overlay */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    opacity: 0.25;
+    pointer-events: none;
+    animation: grain 0.4s steps(1) infinite;
+  }
+  @keyframes grain {
+    0%,100%{ transform: translate(0,0); }
+    10%    { transform: translate(-2%, -3%); }
+    20%    { transform: translate(3%, 1%); }
+    30%    { transform: translate(-1%, 4%); }
+    40%    { transform: translate(4%, -2%); }
+    50%    { transform: translate(-3%, 3%); }
+    60%    { transform: translate(2%, -4%); }
+    70%    { transform: translate(-4%, 1%); }
+    80%    { transform: translate(1%, 3%); }
+    90%    { transform: translate(3%, -1%); }
+  }
+
+  /* ─── Floating particles ─── */
+  #particles {
+    position: fixed; inset: 0; z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    opacity: 0;
+    animation: float-up linear infinite;
+    box-shadow: var(--glow-sm);
+  }
+  @keyframes float-up {
+    0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+  }
+
+  /* ─── Header ─── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 40px;
+    backdrop-filter: blur(16px) saturate(180%);
+    background: linear-gradient(to bottom, #0D0A00EE 0%, #0D0A00AA 100%);
+    border-bottom: 1px solid #FFD70022;
+  }
+
+  .brand {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-shadow: var(--glow-md);
+    text-transform: uppercase;
+    animation: brand-pulse 3s ease-in-out infinite;
+  }
+  @keyframes brand-pulse {
+    0%,100% { text-shadow: var(--glow-md); }
+    50%     { text-shadow: var(--glow-lg); }
+  }
+
+  .brand span {
+    color: var(--gold-bright);
+    display: inline-block;
+    animation: dot-bob 2s ease-in-out infinite;
+  }
+  @keyframes dot-bob {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-3px); }
+  }
+
+  #article-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    max-width: 45%;
+    text-align: right;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  #article-name.visible { opacity: 1; }
+
+  /* ─── Glow line under header ─── */
+  .header-line {
+    position: fixed; top: 61px; left: 0; right: 0; z-index: 99;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold) 30%, var(--gold-bright) 50%, var(--gold) 70%, transparent);
+    box-shadow: 0 0 8px 1px var(--gold-bright);
+    animation: line-shimmer 4s ease-in-out infinite;
+  }
+  @keyframes line-shimmer {
+    0%,100% { opacity: 0.5; }
+    50%     { opacity: 1; box-shadow: 0 0 20px 2px var(--gold-bright); }
+  }
+
+  /* ─── Main content ─── */
+  main {
+    position: relative; z-index: 10;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 130px 40px 100px;
+  }
+
+  /* ─── Loading state ─── */
+  #loading {
+    text-align: center;
+    padding: 80px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--gold-dark);
+    animation: blink-text 1s steps(1) infinite;
+  }
+  @keyframes blink-text {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.3; }
+  }
+
+  #error-msg {
+    display: none;
+    text-align: center;
+    padding: 80px 0;
+    color: #FF6B3566;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+
+  /* ─── Article content: entry animation ─── */
+  #content { opacity: 0; }
+  #content.loaded { animation: content-in 0.8s ease forwards; }
+  @keyframes content-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Markdown rendered styles ─── */
+
+  /* Stagger children */
+  #content > * {
+    opacity: 0;
+    animation: fade-slide 0.55s ease forwards;
+  }
+  #content.loaded > *:nth-child(1)  { animation-delay: 0.05s; }
+  #content.loaded > *:nth-child(2)  { animation-delay: 0.12s; }
+  #content.loaded > *:nth-child(3)  { animation-delay: 0.19s; }
+  #content.loaded > *:nth-child(4)  { animation-delay: 0.26s; }
+  #content.loaded > *:nth-child(5)  { animation-delay: 0.33s; }
+  #content.loaded > *:nth-child(6)  { animation-delay: 0.40s; }
+  #content.loaded > *:nth-child(7)  { animation-delay: 0.47s; }
+  #content.loaded > *:nth-child(8)  { animation-delay: 0.54s; }
+  #content.loaded > *:nth-child(9)  { animation-delay: 0.61s; }
+  #content.loaded > *:nth-child(10) { animation-delay: 0.68s; }
+  #content.loaded > *:nth-child(n+11) { animation-delay: 0.75s; }
+
+  @keyframes fade-slide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Headings */
+  #content h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1.15;
+    color: var(--gold-bright);
+    text-shadow: var(--glow-md);
+    margin: 2rem 0 1.2rem;
+    letter-spacing: -0.01em;
+  }
+  #content h1::after {
+    content: '';
+    display: block;
+    margin-top: 10px;
+    height: 2px;
+    background: linear-gradient(to right, var(--gold-bright), var(--gold-dark), transparent);
+    box-shadow: 0 0 10px var(--gold);
+    animation: line-shimmer 3s ease-in-out infinite;
+  }
+
+  #content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: var(--glow-sm);
+    margin: 2.5rem 0 1rem;
+    letter-spacing: 0.02em;
+    position: relative;
+    padding-left: 20px;
+  }
+  #content h2::before {
+    content: '';
+    position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 5px; height: 70%;
+    background: linear-gradient(to bottom, var(--gold-bright), var(--gold-dark));
+    box-shadow: var(--glow-sm);
+    border-radius: 3px;
+  }
+
+  #content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 700;
+    font-style: italic;
+    color: var(--gold-pale);
+    margin: 2rem 0 0.8rem;
+  }
+
+  #content h4, #content h5, #content h6 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin: 1.5rem 0 0.6rem;
+  }
+
+  /* Paragraph */
+  #content p {
+    color: var(--cream2);
+    margin-bottom: 1.3rem;
+    font-size: 1.05rem;
+    font-weight: 300;
+  }
+
+  /* Bold / italic */
+  #content strong {
+    font-weight: 700;
+    color: var(--gold-bright);
+    text-shadow: 0 0 12px #FFD70055;
+  }
+  #content em {
+    font-style: italic;
+    color: var(--gold-pale);
+  }
+
+  /* Horizontal rule */
+  #content hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent);
+    box-shadow: 0 0 8px var(--gold);
+    margin: 2.5rem 0;
+    animation: line-shimmer 4s ease-in-out infinite;
+  }
+
+  /* Blockquote — glowing outlined box */
+  #content blockquote {
+    position: relative;
+    margin: 2rem 0;
+    padding: 1.4rem 1.8rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--gold-pale);
+    background: #FFD70008;
+    border: 1px solid #FFD70033;
+    border-left: 3px solid var(--gold-bright);
+    border-radius: 4px;
+    box-shadow: 0 0 20px #FFD70011, inset 0 0 30px #FFD70008;
+    overflow: hidden;
+  }
+  #content blockquote::before {
+    content: '"';
+    position: absolute; top: -10px; left: 14px;
+    font-size: 5rem;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold-bright);
+    opacity: 0.12;
+    line-height: 1;
+    pointer-events: none;
+  }
+  /* Corner glow strings on blockquote */
+  #content blockquote::after {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 4px;
+    background: transparent;
+    box-shadow:
+      0 0 8px 1px #FFD70033,
+      inset 0 0 8px 1px #FFD70011;
+    pointer-events: none;
+    animation: bq-glow 2.5s ease-in-out infinite;
+  }
+  @keyframes bq-glow {
+    0%,100% { box-shadow: 0 0 8px 1px #FFD70033, inset 0 0 8px 1px #FFD70011; }
+    50%     { box-shadow: 0 0 20px 2px #FFD70066, inset 0 0 16px 2px #FFD70022; }
+  }
+
+  /* Code inline */
+  #content code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82em;
+    color: var(--gold-bright);
+    background: #FFD70011;
+    border: 1px solid #FFD70033;
+    border-radius: 3px;
+    padding: 1px 6px;
+    text-shadow: 0 0 8px #FFD70066;
+  }
+
+  /* Code block */
+  #content pre {
+    position: relative;
+    background: #0A0800;
+    border: 1px solid #FFD70033;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    box-shadow: 0 0 24px #FFD70011, inset 0 0 30px #0D0A00;
+  }
+  #content pre::before {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, #FFD70044, #B8860B11, #FFD70044) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    animation: border-spin 6s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes border-spin {
+    from { filter: hue-rotate(0deg); }
+    to   { filter: hue-rotate(30deg); }
+  }
+  #content pre code {
+    background: none; border: none; padding: 0;
+    color: var(--gold-pale);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    text-shadow: none;
+  }
+
+  /* Lists */
+  #content ul, #content ol {
+    padding-left: 1.6rem;
+    margin-bottom: 1.3rem;
+  }
+  #content li {
+    color: var(--cream2);
+    margin-bottom: 0.4rem;
+    font-weight: 300;
+    padding-left: 4px;
+  }
+  #content ul li::marker { color: var(--gold); }
+  #content ol li::marker {
+    color: var(--gold-dark);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  /* Links */
+  #content a {
+    color: var(--gold-bright);
+    text-decoration: none;
+    border-bottom: 1px solid #FFD70055;
+    transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+  }
+  #content a:hover {
+    color: #fff;
+    border-color: var(--gold-bright);
+    text-shadow: var(--glow-sm);
+  }
+
+  /* Tables — glowing grid */
+  #content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    position: relative;
+  }
+  #content th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: #FFD70010;
+    padding: 10px 14px;
+    border: 1px solid #FFD70033;
+    text-shadow: 0 0 8px #FFD70066;
+  }
+  #content td {
+    padding: 9px 14px;
+    border: 1px solid #FFD70018;
+    color: var(--cream2);
+    font-weight: 300;
+    transition: background 0.2s;
+  }
+  #content tr:hover td { background: #FFD70008; }
+
+  /* Images */
+  #content img {
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid #FFD70033;
+    box-shadow: 0 0 30px #FFD70022;
+    margin: 1rem 0;
+    display: block;
+  }
+
+  /* ─── Scroll progress bar ─── */
+  #progress {
+    position: fixed; top: 0; left: 0; z-index: 200;
+    height: 3px;
+    background: linear-gradient(to right, var(--gold-dark), var(--gold-bright));
+    box-shadow: 0 0 10px var(--gold-bright);
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ─── Decorative corner ornament ─── */
+  .corner-ornament {
+    position: fixed;
+    width: 80px; height: 80px;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+  .corner-ornament.tl { top: 0; left: 0; }
+  .corner-ornament.br { bottom: 0; right: 0; transform: rotate(180deg); }
+  .corner-ornament svg { width: 100%; height: 100%; }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0D0A00; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--gold-dark), var(--gold));
+    border-radius: 3px;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 600px) {
+    main { padding: 110px 20px 80px; }
+    header { padding: 16px 20px; }
+    .brand { font-size: 18px; }
+    #article-name { font-size: 10px; max-width: 40%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- Particles -->
+<div id="particles"></div>
+
+<!-- Header -->
+<header>
+  <div class="brand">Yellow<span>Dot</span></div>
+  <div id="article-name"></div>
+</header>
+<div class="header-line"></div>
+
+<!-- Corner ornaments -->
+<div class="corner-ornament tl">
+  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L2 40 Q2 2 40 2 Z" stroke="#FFD700" stroke-width="1" fill="none"/>
+    <path d="M2 2 L2 70" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+    <path d="M2 2 L70 2" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+    <circle cx="2" cy="2" r="3" fill="#FFD700"/>
+    <circle cx="2" cy="40" r="1.5" fill="#B8860B"/>
+    <circle cx="40" cy="2" r="1.5" fill="#B8860B"/>
+  </svg>
+</div>
+<div class="corner-ornament br">
+  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L2 40 Q2 2 40 2 Z" stroke="#FFD700" stroke-width="1" fill="none"/>
+    <path d="M2 2 L2 70" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+    <path d="M2 2 L70 2" stroke="#FFD700" stroke-width="0.5" opacity="0.5"/>
+    <circle cx="2" cy="2" r="3" fill="#FFD700"/>
+    <circle cx="2" cy="40" r="1.5" fill="#B8860B"/>
+    <circle cx="40" cy="2" r="1.5" fill="#B8860B"/>
+  </svg>
+</div>
+
+<!-- Main -->
+<main>
+  <div id="loading">LOADING ARTICLE…</div>
+  <div id="error-msg"></div>
+  <div id="content"></div>
+</main>
+
+<script>
+// ─── Particles ───────────────────────────────────────────
+(function spawnParticles() {
+  const container = document.getElementById('particles');
+  const count = 28;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random() * 100}%;
+      animation-duration:${Math.random() * 14 + 8}s;
+      animation-delay:${Math.random() * 12}s;
+      opacity:0;
+    `;
+    container.appendChild(p);
+  }
+})();
+
+// ─── Scroll progress bar ──────────────────────────────────
+window.addEventListener('scroll', () => {
+  const el = document.getElementById('progress');
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  el.style.width = Math.min(pct, 100) + '%';
+});
+
+// ─── Minimal Markdown parser ──────────────────────────────
+function parseMarkdown(md) {
+  // Strip @n="..." directive line
+  md = md.replace(/^@n="[^"]*"\s*\n?/, '');
+
+  const lines = md.split('\n');
+  let html = '';
+  let inUl = false, inOl = false, inCode = false, codeBuffer = '';
+  let inTable = false, tableRows = [];
+
+  function closeList() {
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+  }
+  function flushTable() {
+    if (!inTable || tableRows.length === 0) return;
+    let t = '<table>';
+    tableRows.forEach((row, i) => {
+      const cells = row.split('|').filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+      if (i === 0) {
+        t += '<thead><tr>' + cells.map(c => `<th>${inline(c.trim())}</th>`).join('') + '</tr></thead><tbody>';
+      } else if (i === 1 && row.replace(/[\|\-\s]/g, '') === '') {
+        // separator row — skip
+      } else {
+        t += '<tr>' + cells.map(c => `<td>${inline(c.trim())}</td>`).join('') + '</tr>';
+      }
+    });
+    t += '</tbody></table>';
+    html += t;
+    inTable = false; tableRows = [];
+  }
+
+  function inline(text) {
+    return text
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/_(.+?)_/g, '<em>$1</em>')
+      .replace(/~~(.+?)~~/g, '<del>$1</del>');
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Code block
+    if (line.startsWith('```')) {
+      if (!inCode) {
+        closeList(); flushTable();
+        const lang = line.slice(3).trim();
+        inCode = true; codeBuffer = '';
+        html += `<pre><code class="lang-${lang}">`;
+      } else {
+        html += escapeHtml(codeBuffer) + '</code></pre>';
+        inCode = false; codeBuffer = '';
+      }
+      continue;
+    }
+    if (inCode) { codeBuffer += line + '\n'; continue; }
+
+    // Table
+    if (line.startsWith('|')) {
+      closeList();
+      inTable = true;
+      tableRows.push(line);
+      continue;
+    } else if (inTable) { flushTable(); }
+
+    // Blank line
+    if (line.trim() === '') {
+      closeList();
+      html += '<p style="margin:0;height:0.5rem"></p>';
+      continue;
+    }
+
+    // HR
+    if (/^[-*_]{3,}\s*$/.test(line)) { closeList(); html += '<hr>'; continue; }
+
+    // Headings
+    const hm = line.match(/^(#{1,6})\s+(.*)/);
+    if (hm) {
+      closeList();
+      const lvl = hm[1].length;
+      html += `<h${lvl}>${inline(hm[2])}</h${lvl}>`;
+      continue;
+    }
+
+    // Blockquote
+    if (line.startsWith('> ')) {
+      closeList();
+      html += `<blockquote>${inline(line.slice(2))}</blockquote>`;
+      continue;
+    }
+
+    // UL
+    const ulm = line.match(/^[-*+]\s+(.*)/);
+    if (ulm) {
+      if (!inUl) { if (inOl) { html += '</ol>'; inOl = false; } html += '<ul>'; inUl = true; }
+      html += `<li>${inline(ulm[1])}</li>`;
+      continue;
+    }
+
+    // OL
+    const olm = line.match(/^\d+\.\s+(.*)/);
+    if (olm) {
+      if (!inOl) { if (inUl) { html += '</ul>'; inUl = false; } html += '<ol>'; inOl = true; }
+      html += `<li>${inline(olm[1])}</li>`;
+      continue;
+    }
+
+    // Paragraph
+    closeList();
+    html += `<p>${inline(line)}</p>`;
+  }
+
+  closeList(); flushTable();
+  if (inCode) html += escapeHtml(codeBuffer) + '</code></pre>';
+  return html;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Extract @n name ──────────────────────────────────────
+function extractName(md) {
+  const m = md.match(/^@n="([^"]+)"/m);
+  return m ? m[1] : null;
+}
+
+// ─── Load article ─────────────────────────────────────────
+async function loadArticle() {
+  const params = new URLSearchParams(window.location.search);
+  const article = params.get('article');
+  const loadEl = document.getElementById('loading');
+  const errEl  = document.getElementById('error-msg');
+  const content = document.getElementById('content');
+  const nameEl  = document.getElementById('article-name');
+
+  if (!article) {
+    loadEl.style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.textContent = 'No article specified. Add ?article=filename to the URL.';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${article}.md`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const md = await res.text();
+
+    // Article name
+    const name = extractName(md);
+    if (name) {
+      nameEl.textContent = name;
+      nameEl.classList.add('visible');
+      document.title = `${name} — YellowDot`;
+    }
+
+    // Render
+    content.innerHTML = parseMarkdown(md);
+    loadEl.style.display = 'none';
+    content.classList.add('loaded');
+
+  } catch(e) {
+    loadEl.style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.textContent = `Could not load "${article}.md" — ${e.message}`;
+  }
+}
+
+loadArticle();
+</script>
+</body>
+</html>
