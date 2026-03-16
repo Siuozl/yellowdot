@@ -814,7 +814,7 @@ async function loadArticle() {
   }
 
   try {
-    const res = await fetch(`${article}.md`);
+    const res = await fetch(`articles/${article}.md`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const md = await res.text();
 
