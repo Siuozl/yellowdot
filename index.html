@@ -570,7 +570,20 @@
     font-weight: 500;
     text-shadow: 0 0 8px #FFD70088;
   }
-  .search-empty {
+  .search-section-label {
+    padding: 8px 18px 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    border-top: 1px solid #FFD70018;
+    margin-top: 2px;
+    pointer-events: none;
+    user-select: none;
+  }
+  .search-item-indented { padding-left: 28px; }
+
     padding: 14px 18px;
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -579,13 +592,133 @@
     text-align: center;
   }
 
+
+  /* ─── Breadcrumb ─── */
+  #breadcrumb-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 35%;
+    overflow: hidden;
+    position: relative;
+  }
+  .bc-segment {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .bc-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s, text-shadow 0.2s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+  .bc-btn:hover {
+    color: var(--gold-bright);
+    background: #FFD70011;
+    text-shadow: 0 0 8px #FFD70066;
+  }
+  .bc-btn.bc-article {
+    color: var(--gold);
+    cursor: default;
+    pointer-events: none;
+  }
+  .bc-sep {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: #7A5C00;
+    flex-shrink: 0;
+  }
+  .bc-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: #100D00F5;
+    border: 1px solid #FFD70033;
+    border-radius: 10px;
+    box-shadow: 0 0 30px #FFD70022, 0 8px 40px #00000088;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    z-index: 300;
+    animation: dropdown-in 0.18s ease forwards;
+  }
+  .bc-dropdown.open { display: block; }
+  .bc-drop-item {
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold-pale);
+    cursor: pointer;
+    border-bottom: 1px solid #FFD70011;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bc-drop-item:last-child { border-bottom: none; }
+  .bc-drop-item:hover {
+    background: #FFD70018;
+    color: var(--gold-bright);
+    text-shadow: 0 0 8px #FFD70066;
+  }
+  .bc-drop-item.bc-drop-current {
+    color: var(--gold-bright);
+    background: #FFD70010;
+  }
+  .bc-drop-sublabel {
+    padding: 6px 16px 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    border-top: 1px solid #FFD70011;
+    pointer-events: none;
+  }
+  .bc-drop-sublabel-clickable {
+    pointer-events: all;
+    cursor: pointer;
+    color: var(--gold-dark);
+    transition: color 0.15s, background 0.15s;
+    padding: 8px 16px;
+    border-radius: 0;
+  }
+  .bc-drop-sublabel-clickable:hover {
+    color: var(--gold-bright);
+    background: #FFD70018;
+    text-shadow: 0 0 8px #FFD70066;
+  }
+  .bc-drop-back {
+    color: var(--gold-deep);
+    font-size: 10px;
+    border-bottom: 1px solid #FFD70018;
+    margin-bottom: 2px;
+  }
+  .bc-drop-back:hover { color: var(--gold); }
+
   /* ─── Responsive ─── */
   @media (max-width: 700px) { .search-wrap { flex: 0 1 140px; } }
   @media (max-width: 600px) {
     main { padding: 110px 20px 80px; }
     header { padding: 16px 20px; gap: 10px; }
     .brand { font-size: 18px; }
-    #article-name { font-size: 10px; max-width: 25%; }
+    #breadcrumb-wrap { max-width: 28%; } .bc-btn { font-size: 9px; max-width: 70px; }
     .search-wrap { flex: 0 1 110px; }
   }
 </style>
@@ -604,7 +737,7 @@
     <input type="text" id="search-input" placeholder="Find an article…" autocomplete="off" spellcheck="false">
     <div id="search-dropdown"></div>
   </div>
-  <div id="article-name"></div>
+  <div id="breadcrumb-wrap"></div>
 </header>
 <div class="header-line"></div>
 
@@ -797,6 +930,140 @@ function extractName(md) {
   return m ? m[1] : null;
 }
 
+
+// ─── Breadcrumb ───────────────────────────────────────────
+function findArticlePath(data, slug, path) {
+  for (const entry of data) {
+    if (entry.slug === slug) return [...path];
+    if (entry.section) {
+      // check direct articles
+      const found = findArticlePath(entry.articles || [], slug, [...path, entry]);
+      if (found) return found;
+      // check nested subsections
+      const f2 = findArticlePath(entry.sections || [], slug, [...path, entry]);
+      if (f2) return f2;
+    }
+  }
+  return null;
+}
+
+function flattenSection(group) {
+  // Returns all direct article children (not nested) of a section group
+  return (group.articles || []).filter(a => a.slug);
+}
+
+function buildBreadcrumb(currentSlug, articleName, data) {
+  const wrap = document.getElementById('breadcrumb-wrap');
+  wrap.innerHTML = '';
+  if (!data || data.length === 0) {
+    // fallback: just show article name
+    const span = document.createElement('span');
+    span.className = 'bc-btn bc-article';
+    span.textContent = articleName;
+    wrap.appendChild(span);
+    return;
+  }
+
+  const path = findArticlePath(data, currentSlug, []);
+  // path = array of section groups from root to immediate parent
+
+  let openDropdown = null;
+
+  function closeAll() {
+    wrap.querySelectorAll('.bc-dropdown').forEach(d => d.classList.remove('open'));
+    openDropdown = null;
+  }
+
+  function makeSegment(group, idx) {
+    const seg = document.createElement('div');
+    seg.className = 'bc-segment';
+
+    if (idx > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'bc-sep';
+      sep.textContent = '›';
+      seg.appendChild(sep);
+    }
+
+    const btn = document.createElement('button');
+    btn.className = 'bc-btn';
+    btn.textContent = group.section;
+    seg.appendChild(btn);
+
+    const drop = document.createElement('div');
+    drop.className = 'bc-dropdown';
+
+    function renderDropContents(targetGroup) {
+      drop.innerHTML = '';
+      // Back button if drilled in
+      if (targetGroup !== group) {
+        const back = document.createElement('div');
+        back.className = 'bc-drop-item bc-drop-back';
+        back.textContent = '‹ ' + group.section;
+        back.addEventListener('mousedown', e => { e.preventDefault(); renderDropContents(group); });
+        drop.appendChild(back);
+        const divider = document.createElement('div');
+        divider.className = 'bc-drop-sublabel';
+        divider.textContent = targetGroup.section;
+        drop.appendChild(divider);
+      }
+
+      // Direct articles
+      for (const a of flattenSection(targetGroup)) {
+        const item = document.createElement('div');
+        item.className = 'bc-drop-item' + (a.slug === currentSlug ? ' bc-drop-current' : '');
+        item.textContent = a.name;
+        item.addEventListener('mousedown', e => { e.preventDefault(); window.location.href = '?article=' + encodeURIComponent(a.slug); });
+        drop.appendChild(item);
+      }
+
+      // Subsections as clickable labels
+      for (const sub of (targetGroup.sections || [])) {
+        const lbl = document.createElement('div');
+        lbl.className = 'bc-drop-sublabel bc-drop-sublabel-clickable';
+        lbl.textContent = sub.section + ' ›';
+        lbl.addEventListener('mousedown', e => { e.preventDefault(); renderDropContents(sub); });
+        drop.appendChild(lbl);
+      }
+    }
+
+    renderDropContents(group);
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (openDropdown === drop) { closeAll(); return; }
+      closeAll();
+      renderDropContents(group);
+      drop.classList.add('open');
+      openDropdown = drop;
+    });
+
+    seg.appendChild(drop);
+    return seg;
+  }
+
+  // Render breadcrumb path segments
+  if (path) {
+    path.forEach((group, idx) => {
+      wrap.appendChild(makeSegment(group, idx));
+    });
+    // separator before article name
+    const sep = document.createElement('span');
+    sep.className = 'bc-sep';
+    sep.textContent = path.length > 0 ? '·' : '';
+    wrap.appendChild(sep);
+  }
+
+  // Article name (non-clickable)
+  const artBtn = document.createElement('span');
+  artBtn.className = 'bc-btn bc-article';
+  artBtn.textContent = articleName;
+  wrap.appendChild(artBtn);
+
+  // Close on outside click
+  document.addEventListener('click', closeAll);
+}
+
 // ─── Load article ─────────────────────────────────────────
 async function loadArticle() {
   const params = new URLSearchParams(window.location.search);
@@ -804,12 +1071,11 @@ async function loadArticle() {
   const loadEl = document.getElementById('loading');
   const errEl  = document.getElementById('error-msg');
   const content = document.getElementById('content');
-  const nameEl  = document.getElementById('article-name');
+  let rawArticleData = [];
+  try { const r = await fetch('articles.json'); if (r.ok) rawArticleData = await r.json(); } catch(e) {}
 
   if (!article) {
-    loadEl.style.display = 'none';
-    errEl.style.display = 'block';
-    errEl.textContent = 'No article specified. Add ?article=filename to the URL.';
+    window.location.replace('?article=welcome');
     return;
   }
 
@@ -818,12 +1084,11 @@ async function loadArticle() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const md = await res.text();
 
-    // Article name
+    // Article name + breadcrumb
     const name = extractName(md);
     if (name) {
-      nameEl.textContent = name;
-      nameEl.classList.add('visible');
       document.title = `${name} — YellowDot`;
+      buildBreadcrumb(article, name, rawArticleData);
     }
 
     // Render
@@ -832,41 +1097,37 @@ async function loadArticle() {
     content.classList.add('loaded');
 
   } catch(e) {
-    loadEl.style.display = 'none';
-    errEl.style.display = 'block';
-    errEl.textContent = `Could not load "${article}.md" — ${e.message}`;
+    if (article === '404') {
+      loadEl.style.display = 'none';
+      errEl.style.display = 'block';
+      errEl.textContent = '404 — Article not found.';
+    } else {
+      window.location.replace('?article=404');
+    }
   }
 }
 
 // ─── Search ───────────────────────────────────────────────
 (async function initSearch() {
-  let articles = [];
+  let rawData = [];
   try {
     const res = await fetch('articles.json');
-    if (res.ok) articles = await res.json();
+    if (res.ok) rawData = await res.json();
   } catch(e) {}
+
+  // Flatten all articles for search; keep sections for grouped display
+  function flatArticles() {
+    const flat = [];
+    for (const entry of rawData) {
+      if (entry.slug) flat.push(entry);
+      else if (entry.section && entry.articles) flat.push(...entry.articles);
+    }
+    return flat;
+  }
 
   const input    = document.getElementById('search-input');
   const dropdown = document.getElementById('search-dropdown');
   let activeIdx  = -1;
-
-  function sortedArticles(query) {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      const welcome = articles.filter(a => a.name.toLowerCase() === 'welcome');
-      const rest = articles.filter(a => a.name.toLowerCase() !== 'welcome')
-                           .sort((a,b) => a.name.localeCompare(b.name));
-      return [...welcome, ...rest];
-    }
-    return articles
-      .filter(a => a.name.toLowerCase().includes(q))
-      .sort((a,b) => {
-        const ai = a.name.toLowerCase().indexOf(q);
-        const bi = b.name.toLowerCase().indexOf(q);
-        if (ai !== bi) return ai - bi;
-        return a.name.localeCompare(b.name);
-      });
-  }
 
   function highlight(text, query) {
     if (!query.trim()) return text;
@@ -882,21 +1143,57 @@ async function loadArticle() {
   }
 
   function renderDropdown(query) {
-    const results = sortedArticles(query);
+    const q = query.trim().toLowerCase();
     activeIdx = -1;
-    if (results.length === 0) {
-      dropdown.innerHTML = '<div class="search-empty">No articles found</div>';
+    let html = '';
+    let itemCount = 0;
+
+    if (!q) {
+      // Grouped view: Welcome first (from flat top-level), then sections
+      const topLevel = rawData.filter(e => e.slug);
+      const welcome  = topLevel.filter(a => a.name.toLowerCase() === 'welcome');
+      const others   = topLevel.filter(a => a.name.toLowerCase() !== 'welcome')
+                               .sort((a,b) => a.name.localeCompare(b.name));
+      const sections = rawData.filter(e => e.section);
+
+      for (const a of [...welcome, ...others]) {
+        html += `<div class="search-item" data-slug="${a.slug}">${a.name}</div>`;
+        itemCount++;
+      }
+      for (const group of sections) {
+        html += `<div class="search-section-label">${group.section}</div>`;
+        for (const a of group.articles) {
+          html += `<div class="search-item search-item-indented" data-slug="${a.slug}">${a.name}</div>`;
+          itemCount++;
+        }
+      }
     } else {
-      dropdown.innerHTML = results.map((a, i) =>
-        `<div class="search-item" data-slug="${a.slug}" data-idx="${i}">${highlight(a.name, query)}</div>`
-      ).join('');
-      dropdown.querySelectorAll('.search-item').forEach(el => {
-        el.addEventListener('mousedown', e => {
-          e.preventDefault();
-          navigate(el.dataset.slug);
-        });
-      });
+      // Section-aware search
+      const topLevel = rawData.filter(e => e.slug);
+      const topMatches = topLevel.filter(a => a.name.toLowerCase().includes(q));
+      for (const a of topMatches) {
+        html += `<div class="search-item" data-slug="${a.slug}">${highlight(a.name, query)}</div>`;
+        itemCount++;
+      }
+      const sections = rawData.filter(e => e.section);
+      for (const group of sections) {
+        const sectionMatches = group.section.toLowerCase().includes(q);
+        const articleMatches = group.articles.filter(a => a.name.toLowerCase().includes(q));
+        const toShow = sectionMatches ? group.articles : articleMatches;
+        if (toShow.length === 0) continue;
+        html += `<div class="search-section-label">${highlight(group.section, query)}</div>`;
+        for (const a of toShow) {
+          html += `<div class="search-item search-item-indented" data-slug="${a.slug}">${highlight(a.name, query)}</div>`;
+          itemCount++;
+        }
+      }
+      if (itemCount === 0) html = '<div class="search-empty">No articles found</div>';
     }
+
+    dropdown.innerHTML = html || '<div class="search-empty">No articles found</div>';
+    dropdown.querySelectorAll('.search-item').forEach(el => {
+      el.addEventListener('mousedown', e => { e.preventDefault(); navigate(el.dataset.slug); });
+    });
     dropdown.classList.add('open');
   }
 

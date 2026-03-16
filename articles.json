@@ -1,4 +1,18 @@
 [
   { "slug": "welcome", "name": "Welcome" },
-  { "slug": "bendercash", "name": "BenderCash" }
+  {
+    "section": "Businesses",
+    "articles": 
+    [   { "slug": "bendercash", "name": "BenderCash" }
+    ]
+  },
+  {
+    "section": "Seasonal sets & crates",
+    "articles": [
+        { "slug": "ssnls", "name": "Seasonal sets" }
+        { "section": "Seasonal crates", "articles": [
+            { "slug": "ssncrates", "name": "Seasonal crates" }
+        ] }
+    ]
+  }
 ]
