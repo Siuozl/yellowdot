@@ -2,17 +2,22 @@
   { "slug": "welcome", "name": "Welcome" },
   {
     "section": "Businesses",
-    "articles": 
-    [   { "slug": "bendercash", "name": "BenderCash" }
+    "articles": [
+      { "slug": "bendercash", "name": "BenderCash" }
     ]
   },
   {
     "section": "Seasonal sets & crates",
     "articles": [
-        { "slug": "ssnls", "name": "Seasonal sets" },
-        { "section": "Seasonal crates", "articles": [
-            { "slug": "ssncrates", "name": "Seasonal crates" }
-        ] }
+      { "slug": "ssnls", "name": "Seasonal sets" }
+    ],
+    "sections": [
+      {
+        "section": "Seasonal archive",
+        "articles": [
+            { "slug": "ssnls/march2026", "name": "March 2026" }
+        ]
+      }
     ]
   }
 ]
