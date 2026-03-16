@@ -9,7 +9,7 @@
   {
     "section": "Seasonal sets & crates",
     "articles": [
-        { "slug": "ssnls", "name": "Seasonal sets" }
+        { "slug": "ssnls", "name": "Seasonal sets" },
         { "section": "Seasonal crates", "articles": [
             { "slug": "ssncrates", "name": "Seasonal crates" }
         ] }
