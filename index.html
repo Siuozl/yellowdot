@@ -596,16 +596,19 @@
   /* ─── Breadcrumb ─── */
   #breadcrumb-wrap {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     max-width: 35%;
     overflow: hidden;
     position: relative;
+    flex-wrap: nowrap;
   }
   .bc-segment {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     white-space: nowrap;
     flex-shrink: 1;
     min-width: 0;
@@ -1115,14 +1118,78 @@ async function loadArticle() {
     if (res.ok) rawData = await res.json();
   } catch(e) {}
 
-  // Flatten all articles for search; keep sections for grouped display
-  function flatArticles() {
+  // Recursively flatten all articles from nested structure
+  function flatArticles(data) {
+    data = data || rawData;
     const flat = [];
-    for (const entry of rawData) {
-      if (entry.slug) flat.push(entry);
-      else if (entry.section && entry.articles) flat.push(...entry.articles);
+    for (const entry of data) {
+      if (entry.slug) { flat.push(entry); continue; }
+      if (entry.section) {
+        flat.push(...flatArticles(entry.articles || []));
+        flat.push(...flatArticles(entry.sections || []));
+      }
     }
     return flat;
+  }
+
+  // Recursively render a section group into html, with indentation level
+  function renderGroup(group, query, q, indent) {
+    let html = '';
+    let count = 0;
+    const sectionMatches = group.section.toLowerCase().includes(q);
+    const directArticles = (group.articles || []).filter(a => a.slug);
+    const nested = group.sections || [];
+
+    // Collect matching articles (direct + from nested if section name matches)
+    const articleMatches = directArticles.filter(a => a.name.toLowerCase().includes(q));
+    const directToShow = sectionMatches ? directArticles : articleMatches;
+
+    // Check nested subsections recursively
+    let nestedHtml = '';
+    let nestedCount = 0;
+    for (const sub of nested) {
+      const { html: sh, count: sc } = renderGroupResult(sub, query, q, indent + 1, sectionMatches);
+      nestedHtml += sh; nestedCount += sc;
+    }
+
+    if (directToShow.length === 0 && nestedCount === 0) return { html: '', count: 0 };
+
+    const pad = indent > 0 ? ` style="padding-left:${16 + indent * 12}px"` : '';
+    html += `<div class="search-section-label"${pad}>${highlight(group.section, query)}</div>`;
+    for (const a of directToShow) {
+      html += `<div class="search-item search-item-indented" data-slug="${a.slug}"${pad ? ` style="padding-left:${28 + indent * 12}px"` : ''}>${highlight(a.name, query)}</div>`;
+      count++;
+    }
+    html += nestedHtml; count += nestedCount;
+    return { html, count };
+  }
+
+  function renderGroupResult(group, query, q, indent, parentSectionMatches) {
+    let html = '';
+    let count = 0;
+    const sectionMatches = parentSectionMatches || group.section.toLowerCase().includes(q);
+    const directArticles = (group.articles || []).filter(a => a.slug);
+    const nested = group.sections || [];
+    const directToShow = sectionMatches ? directArticles : directArticles.filter(a => a.name.toLowerCase().includes(q));
+
+    let nestedHtml = '';
+    let nestedCount = 0;
+    for (const sub of nested) {
+      const { html: sh, count: sc } = renderGroupResult(sub, query, q, indent + 1, sectionMatches);
+      nestedHtml += sh; nestedCount += sc;
+    }
+
+    if (directToShow.length === 0 && nestedCount === 0) return { html: '', count: 0 };
+
+    const labelPad = indent > 0 ? ` style="padding-left:${16 + indent * 12}px"` : '';
+    const itemPad  = indent > 0 ? ` style="padding-left:${28 + indent * 12}px"` : '';
+    html += `<div class="search-section-label"${labelPad}>${highlight(group.section, query)}</div>`;
+    for (const a of directToShow) {
+      html += `<div class="search-item search-item-indented" data-slug="${a.slug}"${itemPad}>${highlight(a.name, query)}</div>`;
+      count++;
+    }
+    html += nestedHtml; count += nestedCount;
+    return { html, count };
   }
 
   const input    = document.getElementById('search-input');
@@ -1162,30 +1229,28 @@ async function loadArticle() {
       }
       for (const group of sections) {
         html += `<div class="search-section-label">${group.section}</div>`;
-        for (const a of group.articles) {
+        for (const a of (group.articles || []).filter(e => e.slug)) {
           html += `<div class="search-item search-item-indented" data-slug="${a.slug}">${a.name}</div>`;
           itemCount++;
         }
+        for (const sub of (group.sections || [])) {
+          html += `<div class="search-section-label" style="padding-left:28px">${sub.section}</div>`;
+          for (const a of (sub.articles || []).filter(e => e.slug)) {
+            html += `<div class="search-item search-item-indented" data-slug="${a.slug}" style="padding-left:40px">${a.name}</div>`;
+            itemCount++;
+          }
+        }
       }
     } else {
-      // Section-aware search
+      // Section-aware search (nested)
       const topLevel = rawData.filter(e => e.slug);
-      const topMatches = topLevel.filter(a => a.name.toLowerCase().includes(q));
-      for (const a of topMatches) {
+      for (const a of topLevel.filter(a => a.name.toLowerCase().includes(q))) {
         html += `<div class="search-item" data-slug="${a.slug}">${highlight(a.name, query)}</div>`;
         itemCount++;
       }
-      const sections = rawData.filter(e => e.section);
-      for (const group of sections) {
-        const sectionMatches = group.section.toLowerCase().includes(q);
-        const articleMatches = group.articles.filter(a => a.name.toLowerCase().includes(q));
-        const toShow = sectionMatches ? group.articles : articleMatches;
-        if (toShow.length === 0) continue;
-        html += `<div class="search-section-label">${highlight(group.section, query)}</div>`;
-        for (const a of toShow) {
-          html += `<div class="search-item search-item-indented" data-slug="${a.slug}">${highlight(a.name, query)}</div>`;
-          itemCount++;
-        }
+      for (const group of rawData.filter(e => e.section)) {
+        const { html: gh, count: gc } = renderGroupResult(group, query, q, 0, false);
+        html += gh; itemCount += gc;
       }
       if (itemCount === 0) html = '<div class="search-empty">No articles found</div>';
     }
