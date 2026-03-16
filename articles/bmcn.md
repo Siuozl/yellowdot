@@ -11,4 +11,6 @@ In his statement, Jack mentions that I "stole his reporter".
 Two reporters came to me saying they really wanted to be writers for BMCYD, and I didn't have anything against it. Is that really stealing? They came to me, I did nothing.
 
 Here's what one of those reporters thinks about this.
-### Realtime updating- stay tuned for the next part where Redgamer explains his point of view.
+## Redgamer's opinion.
+I joined on yellow dot on march 16th. I was just checking it out and said hello then I applied for writer. Then Forward came in and the drama started. Jack said I was stolen from Bmcn and didn’t say the much higher ranking forward. I only took this job as a writer to get money for my capital and I didn’t want to cause drama.
+But I think Jack was wrong cause Yellow dot reports on everything even the small stuff. Also right now there isn’t any “big” news only small stuff. But it also doesn’t mean he was wrong I did leave for better pay and did immediately join when the ad came up.
