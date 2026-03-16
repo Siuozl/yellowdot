@@ -22,3 +22,5 @@ Type these in chat:
 > /pw go BenderFashion
 
 > /pw go BenderFarm
+
+###### Document written & published by **Snizzle** on March 15th, 2026
