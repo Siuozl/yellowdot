@@ -1,11 +1,6 @@
 [
   { "slug": "welcome", "name": "Welcome" },
-  {
-    "section": "Businesses",
-    "articles": [
-      { "slug": "bendercash", "name": "BenderCash" }
-    ]
-  },
+  { "slug": "shamrockfounder", "name": "Shamrock Founder Controversy" },
   {
     "section": "Seasonal sets & crates",
     "articles": [
