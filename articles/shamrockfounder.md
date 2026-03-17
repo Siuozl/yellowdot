@@ -14,7 +14,6 @@ Parts of the announcement appear inconsistent when examined closely. The develop
 *“If you have just regular Founder, then the server loses $71.88 per Founder per year because of the free keys you get.”* However, this is difficult to reconcile with the current pricing structure:
 
 | Item | Calculation | Total |
-| :--- | :--- | :--- |
 | **Founder Subscription** | $19.99 × 12 months | **$239.88** |
 | **Seasonal Key Value** | $5.99 × 12 months | **($71.88)** |
 | **Net Annual Revenue** | $239.88 - $71.88 | **$168.00** |
@@ -30,5 +29,5 @@ The Shamrock Founder upgrade costs existing members slightly over $10. While the
 
 ### Community Sentiment
 Player feedback remains mixed. While some find the new rank appealing, many argue it contributes to a **pay-to-win (P2W)** environment. Critics suggest that if the goal were truly to prioritize player experience over revenue, powerful features like **multi-bending** would be accessible to the entire community rather than being locked behind expensive, premium ranks.
-###### Written by Redgamer
-###### Published by Snizzle
+###### Written by YutaNeedsYuta
+###### Published by Snizzle on March 17th 2026
