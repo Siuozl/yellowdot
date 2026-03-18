@@ -14,5 +14,11 @@
         ]
       }
     ]
+  },
+  {
+    "section": "Guilds",
+    "articles": [
+      { "slug": "guilds/imp-looks-away", "name": "The Imperial Eye Looks Away" }
+    ]
   }
 ]
