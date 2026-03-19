@@ -1,7 +1,6 @@
 [
   { "slug": "welcome", "name": "Welcome" },
   { "slug": "shamrockfounder", "name": "Shamrock Founder Controversy" },
-  {"slug": "test", "name": "testing an article"},
   {
     "section": "Seasonal sets & crates",
     "articles": [
