@@ -559,7 +559,9 @@ main {
   border-radius: ${sr.dropdown_radius || "10px"};
   box-shadow: ${sr.dropdown_shadow || "0 0 30px #FFD70022, 0 8px 40px #00000088"};
   backdrop-filter: blur(20px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: ${sr.dropdown_max_height || "320px"};
   z-index: 300;
   animation: dropdown-in ${sr.dropdown_anim_duration || "0.18s"} ease forwards;
 }
