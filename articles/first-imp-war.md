@@ -22,11 +22,11 @@ As the reset has just happened, I doubt any nation is too attached to S4 other t
 The UCSR had defeated all the other nations of survival 4, conquering jungle port, port city, earth town, water town, an air settlement, and water town, and forcing them to join them in the finalization war in the first few days of April. The UCSR had conquered the whole of survival 4 and because of them, survival 4 was now the most popular survival instead of survival 4 The UCSR was constantly at war and they had by far the best army in the whole server known as the red army.
 
 After survival 2-4 did a soft reset, the elemental empire built a base on a hilltop on survival 4, attempting to establish a presence survival 4. The ruler of the UCSR, sageplasma444, took issue with this and issued an ultimatum to the elemental empire, demanding that they leave their base in exchange for money on all the other survivals. The elemental empire promptly rejected that offer and so the UCSR declared war on the elemental empire on the 4th of april in the name of anti-imperialism, so it was called the imperial war.
-image1.png
+[!](https://siuozl.github.io/yellowdot/articles/images/first-imp-war/image1.png)
 The red army attacked the elemental empire's base, camping and destroyed what they could, killing any civilians that stepped outside of a claim. The elemental empire hardly ever showed up to battle them, when they did it was only a few fighters who would get slaughtered by the red army's better skill and superior numbers. Most of the elemental empire's base was fine for the most part but there was noticeable damage to some buildings and outside the base and claim. The UCSR also tried something new, they deployed the red navy, they built multiple ships in the Elemental empire's harbor, they operated as supply depots and as an ever-present sight that the red army was there. The occupation lasted about 2 weeks.
-image2.png
-image3.png
-image4.png
+[!](https://siuozl.github.io/yellowdot/articles/images/first-imp-war/image2.png)
+[!](https://siuozl.github.io/yellowdot/articles/images/first-imp-war/image3.png)
+[!](https://siuozl.github.io/yellowdot/articles/images/first-imp-war/image4.png)
 On the 6th of April the united factions made an announcement about the war.
 ## United Factions News!
 

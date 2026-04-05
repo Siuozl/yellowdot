@@ -6,7 +6,7 @@
   { "slug": "paralyze", "name": "Paralyze Ability Backlash" },
   { "slug": "greatmerge", "name": "The BendersMC Great Merge" },
   { "slug": "wndsq", "name": "Why Nations Die So Quickly"},
-  { "slug": "first-imp-war", "name": "The First Imperial War"},
+  { "slug": "spear-removal", "name": "Should spears be removed from BMC" },
   {
     "section": "Seasonal sets & crates",
     "articles": [
@@ -24,7 +24,8 @@
   {
     "section": "Guilds",
     "articles": [
-      { "slug": "guilds/imp-looks-away", "name": "The Imperial Eye Looks Away" }
+      { "slug": "guilds/imp-looks-away", "name": "The Imperial Eye Looks Away" },
+      { "slug": "first-imp-war", "name": "The First Imperial War"}
     ]
   }
 ]
